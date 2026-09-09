@@ -1,3 +1,24 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Supabase local files and functions
+supabase/
+
+# Production build outputs
+dist
+dist-ssr
+
+# Environment variables & secrets (Never commit secrets!)
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
 # Logs
 logs
 *.log
@@ -7,20 +28,30 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# TypeScript build info cache
+*.tsbuildinfo
+next-env.d.ts
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.bak
+*.tmp
 
-.env
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Thumbs.db:encryptable
+[Dd]esktop.ini

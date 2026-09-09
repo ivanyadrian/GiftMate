@@ -1,1 +1,152 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
+@theme {
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Custom mobile breakpoint */
+  --breakpoint-xs: 380px;
+
+  /* Color palette */
+  --color-background: #f9fafb;
+  --color-surface: #ffffff;
+  --color-text-primary: #111827;
+
+  /* Toast progress bar countdown */
+  @keyframes progress {
+    0% {
+      width: 0%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
+  /* Toast slide in */
+  @keyframes slideInRight {
+    0% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Toast slide out */
+  @keyframes slideOutRight {
+    0% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  /* Modal backdrop fade */
+  @keyframes backdropFadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* Modal scale and pop in */
+  @keyframes modalPopIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.97) translateY(4px) translateZ(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0) translateZ(0);
+    }
+  }
+}
+
+@layer base {
+  /* Reset */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Base page styles */
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /* Global button click animations and disabled state */
+  button {
+    @apply cursor-pointer 
+    transition-all duration-150 active:scale-[0.95] 
+    disabled:hover:brightness-100 disabled:active:scale-100 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Primary green action button */
+  .btn-green {
+    @apply py-3 px-4
+     bg-emerald-600 text-white 
+     font-medium text-sm
+     flex justify-center items-center
+     rounded-xl shadow-sm 
+     hover:brightness-110
+     hover:shadow;
+  }
+
+  /* Standard form inputs */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-lg border border-slate-200 text-slate-800 text-sm 
+           focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 
+           transition-all placeholder:text-slate-400;
+  }
+
+  /* Date and time picker icons */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator,
+  .input-field::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    transition: scale 0.2s ease-in-out;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover,
+  input[type="time"]::-webkit-calendar-picker-indicator:hover,
+  .input-field::-webkit-calendar-picker-indicator:hover {
+    scale: 1.5;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 9999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+  }
+}
