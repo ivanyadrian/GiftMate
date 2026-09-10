@@ -47,7 +47,13 @@ export default function ForgotPasswordModal({
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccess(false);
+    if (email.trim().toLowerCase() === "demo@giftmate.app") {
+      setError(
+        "A nyilvános demó fiók jelszava biztonsági okokból nem állítható vissza!",
+      );
+      setLoading(false);
+      return;
+    }
 
     // Request reset link pointing back to the /update-password route
     const { error } = await supabase.auth.resetPasswordForEmail(email, {

@@ -113,6 +113,16 @@ export default function UpdatePassword() {
       return;
     }
 
+    // Prevent updating password for public demo account
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user?.email?.toLowerCase() === "demo@giftmate.app") {
+      setError("A nyilvános demó fiók jelszava nem módosítható!");
+      setLoading(false);
+      return;
+    }
+
     // Update password for the currently authenticated recovery user
     const { error } = await supabase.auth.updateUser({
       password: password,

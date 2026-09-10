@@ -198,6 +198,12 @@ export default function Profile() {
    * Cleans up custom uploaded avatars from Supabase Storage and calls `delete_current_user` RPC.
    */
   const handleDeleteAccount = async () => {
+    if (user?.email?.toLowerCase() === "demo@giftmate.app") {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setErrorMsg("A nyilvános demó fiók nem törölhető!");
+      return;
+    }
     setIsDeleting(true);
     setErrorMsg(null);
 
@@ -239,6 +245,10 @@ export default function Profile() {
    * Enters inline email editing mode.
    */
   const startEditingEmail = () => {
+    if (user?.email?.toLowerCase() === "demo@giftmate.app") {
+      setErrorMsg("A nyilvános demó fiók e-mail címe nem módosítható!");
+      return;
+    }
     setEditEmail(user?.email || "");
     setIsEditingEmail(true);
     setErrorMsg(null);
@@ -301,6 +311,11 @@ export default function Profile() {
    */
   const saveEmail = async () => {
     if (!user) return;
+    if (user?.email?.toLowerCase() === "demo@giftmate.app") {
+      setErrorMsg("A nyilvános demó fiók e-mail címe nem módosítható!");
+      setIsEditingEmail(false);
+      return;
+    }
     const newEmail = editEmail.trim();
     if (!newEmail || !newEmail.includes("@")) {
       setErrorMsg("Kérlek adj meg egy érvényes e-mail címet!");
@@ -349,6 +364,8 @@ export default function Profile() {
 
   // Determine whether the user authenticated using Google OAuth (email editing is disabled for OAuth users)
   const isGoogleUser = user.app_metadata?.providers?.includes("google");
+  // Check if current user is the shared public demo account (locks email editing and account deletion)
+  const isDemoUser = user.email?.toLowerCase() === "demo@giftmate.app";
 
   return (
     <div className="min-h-[calc(100vh-80px)] w-full flex flex-col p-4 sm:p-6 bg-slate-50 text-slate-900 font-sans items-center">
@@ -551,6 +568,10 @@ export default function Profile() {
                       <CloseIcon className="w-4 h-4" />
                     </button>
                   </>
+                ) : isDemoUser ? (
+                  <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    Demó fiók
+                  </span>
                 ) : (
                   !isGoogleUser && (
                     <button
@@ -575,15 +596,21 @@ export default function Profile() {
               <LogOut className="w-4 h-4" /> Kijelentkezés
             </button>
 
-            <button
-              onClick={() => {
-                setShowDeleteModal(true);
-                setDeleteEmailInput("");
-              }}
-              className="w-full py-2.5 px-4 bg-transparent hover:bg-red-50 text-red-600 font-semibold text-sm rounded-xl duration-150 flex items-center justify-center gap-2 border border-transparent hover:border-red-100"
-            >
-              Fiók végleges törlése
-            </button>
+            {isDemoUser ? (
+              <div className="w-full py-2.5 px-4 bg-slate-100 text-slate-400 font-medium text-xs rounded-xl flex items-center justify-center gap-2 text-center select-none">
+                A nyilvános demó fiók védett, nem törölhető.
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setShowDeleteModal(true);
+                  setDeleteEmailInput("");
+                }}
+                className="w-full py-2.5 px-4 bg-transparent hover:bg-red-50 text-red-600 font-semibold text-sm rounded-xl duration-150 flex items-center justify-center gap-2 border border-transparent hover:border-red-100 cursor-pointer"
+              >
+                Fiók végleges törlése
+              </button>
+            )}
           </div>
         </div>
       </div>
