@@ -7,6 +7,7 @@ import {
   UserRoundKey,
   CircleCheck,
   CalendarClock,
+  Lock,
 } from "lucide-react";
 
 export interface RoomCardProps {
@@ -25,6 +26,7 @@ export interface RoomCardProps {
   memberCount: number;
   simplified?: boolean;
   isDrawn?: boolean;
+  isLocked?: boolean;
   actionButton?: {
     text: string;
     onClick?: () => void;
@@ -49,6 +51,7 @@ export default function RoomCard({
   memberCount,
   simplified = false,
   isDrawn = false,
+  isLocked = false,
   actionButton,
 }: RoomCardProps) {
   const getBannerImage = () => {
@@ -106,10 +109,22 @@ export default function RoomCard({
         ></div>
         <div className="absolute inset-0 bg-black/15 pointer-events-none"></div>
 
-        {/* Létszám badge a jobb felső sarokban */}
-        <div className="absolute top-4 right-4 bg-white/30 backdrop-blur-md px-3.5 py-1 rounded-full text-white text-[11px] font-bold tracking-wider border border-white/40 shadow-xs flex items-center gap-1.5 z-10">
-          <Users className="w-3.5 h-3.5 stroke-3" />
-          <span>{memberCount} TAG</span>
+        {/* Létszám és zárolási státusz a jobb felső sarokban */}
+        <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10">
+          <div className="bg-white/30 backdrop-blur-md px-3.5 py-1 rounded-full text-white text-[11px] font-bold tracking-wider border border-white/40 shadow-xs flex items-center gap-1.5 select-none">
+            <Users className="w-3.5 h-3.5 stroke-3" />
+            <span>{memberCount} TAG</span>
+          </div>
+
+          {isLocked && (
+            <div
+              className="bg-amber-500/90 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[11px] font-bold tracking-wider border border-amber-300/40 shadow-xs flex items-center gap-1 select-none"
+              title="Védett bemutató szoba (nem törölhető, a tagok nem távolíthatók el)"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>VÉDETT</span>
+            </div>
+          )}
         </div>
 
         {/* Sorsolás állapota tab badge középen alul a fehér kártya mögött, a banner előtt */}
@@ -131,9 +146,9 @@ export default function RoomCard({
       <div className="p-4 sm:p-8 flex-1 flex flex-col bg-white relative z-10">
         <div className="mb-6">
           <h3
-            className={`text-xl font-bold text-slate-800 leading-tight wrap-break-words mb-4 ${simplified ? "line-clamp-1" : "line-clamp-2"}`}
+            className={`text-xl font-bold text-slate-800 leading-tight wrap-break-words mb-4 flex items-center gap-2 ${simplified ? "line-clamp-1" : "line-clamp-2"}`}
           >
-            {roomName || "Szoba neve..."}
+            <span className="truncate">{roomName || "Szoba neve..."}</span>
           </h3>
 
           <div className="flex flex-col xs:flex-row xs:items-start justify-between gap-3 xs:gap-4 border-t border-slate-50 pt-4">

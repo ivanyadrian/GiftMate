@@ -526,6 +526,7 @@ export default function Dashboard() {
                         drawTime={room.draw_time || ""}
                         memberCount={Number(room.member_count) || 0}
                         isDrawn={!!room.is_drawn}
+                        isLocked={room.room_code === "U1J1TN"}
                         simplified={true}
                         actionButton={{
                           text: "Részletek",

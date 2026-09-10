@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Users,
   Calendar,
@@ -12,7 +12,6 @@ import {
   UserX,
   UserRoundMinus,
 } from "lucide-react";
-
 
 interface RoomMembersProps {
   members: any[];
@@ -79,12 +78,30 @@ export default function RoomMembers({
     }
   }, [hasDrawn]);
 
+  // Priority sorting:
+  // 1. Room organizer always appears first
+  // 2. Currently logged-in user ("Te") appears immediately below the organizer
+  // 3. Other participants maintain their join order
+  const sortedMembers = useMemo(() => {
+    return [...members].sort((a, b) => {
+      // 1. Organizer always first
+      if (a.is_owner && !b.is_owner) return -1;
+      if (!a.is_owner && b.is_owner) return 1;
+
+      // 2. Current user immediately next
+      if (a.is_me && !b.is_me) return -1;
+      if (!a.is_me && b.is_me) return 1;
+
+      return 0;
+    });
+  }, [members]);
+
   // Management mode is only permissible for the room owner prior to draw execution,
   // and only if at least one eligible kickable member exists.
   const canManage =
     isOwner &&
     !hasDrawn &&
-    members.some((m) => !m.is_owner && !m.is_me && !m.is_deleted);
+    sortedMembers.some((m) => !m.is_owner && !m.is_me && !m.is_deleted);
 
   return (
     <div className="relative overflow-hidden bg-white rounded-3xl shadow-sm border border-slate-200 p-5 sm:p-8 flex flex-col gap-6 h-full">
@@ -169,7 +186,7 @@ export default function RoomMembers({
             onScroll={checkScroll}
             className="h-full max-h-80 lg:max-h-none overflow-y-auto flex flex-col gap-3 -mr-3 sm:-mr-5 pr-2.5 sm:pr-4 scrollbar-thin"
           >
-            {members.map((m, index) => {
+            {sortedMembers.map((m, index) => {
               const username = m.profiles?.username || "Névtelen játékos";
               const isDeleted = !!m.is_deleted;
               const avatarUrl = isDeleted
