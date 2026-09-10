@@ -3,8 +3,6 @@ node_modules
 .pnp
 .pnp.js
 
-# Supabase local files and functions
-supabase/
 
 # Production build outputs
 dist
