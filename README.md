@@ -1,6 +1,10 @@
-# GiftMate — Modern Realtime Secret Santa Platform
+<div align="center">
 
-**English** | [Magyar](README.hu.md)
+# GiftMate
+
+**A modern, full-stack, real-time Secret Santa platform.**
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-giftmate--sooty.vercel.app-blueviolet?style=for-the-badge)](https://giftmate-sooty.vercel.app/)
 
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -8,8 +12,12 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3FCF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://vercel.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://giftmate-sooty.vercel.app/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+
+**English** | [Magyar](README.hu.md)
+
+</div>
 
 **GiftMate** is a full-stack, real-time Secret Santa web application engineered with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Supabase (PostgreSQL)**.
 
@@ -84,7 +92,7 @@ Built with **Row Level Security (RLS)**, atomic **PostgreSQL Stored Procedures (
 ### Interactive Demo Sandbox & Protected Showcase
 
 - **Public Showcase Account Guarding**: The public demo profile (`demo@giftmate.app`) is protected from email modifications, password resets, and account deletion at both UI and PostgreSQL RPC levels.
-- **Protected Showcase Room (`U1J1TN`)**: Features a pre-configured, populated room where destructive mutations (room deletion, participant kicking, leaving, or joining) are prevented via database checks, while room customization and draw testing remain fully functional.
+- **Protected Showcase Room**: Features a pre-configured, populated room where destructive mutations (room deletion, participant kicking, leaving, or joining) are prevented via database checks, while room customization and draw testing remain fully functional.
 - **Visual Status Badges**: Features a distinctive `VÉDETT` badge with a `Lock` icon on the dashboard card and room title.
 
 ### UX Optimizations & Dynamic Roster Prioritization
@@ -230,6 +238,25 @@ The database schema and PostgreSQL functions used in GiftMate are organized in t
 - **`reveal_my_draw`**: Tracks whether the participant has viewed their assigned partner.
 - **`update_profile_username`**: Enforces room-wide unique display names to avoid participant confusion.
 - **`delete_current_user`**: Safely deletes account data, converts active draws into ghost participants, and blocks removal of the public demo user.
+
+---
+
+## Acknowledgements & Assets
+
+- **Vector Animations**: Lightweight Lottie animations powered by [@lottiefiles/dotlottie-react](https://lottiefiles.com/):
+  - [Christmas Wind Chimes](https://lottiefiles.com/free-animation/christmas-wind-chimes-tB4neGTtaS) (LottieFiles Community)
+  - [Referral Gift Unboxing](https://lottiefiles.com/free-animation/referral-gift-wrnR6uNcE4) (LottieFiles Community)
+  - [Hourglass Timer Loader](https://lottiefiles.com/free-animation/time-hourglass-H3UkbK6hVS) (LottieFiles Community)
+  - [Confetti Celebration](https://lottiefiles.com/free-animation/confetti-ixxUbTQ3Fn) (LottieFiles Community)
+  - [Animated Checkmark](https://lottiefiles.com/free-animation/checkmark-EUqSK4A5c8) (LottieFiles Community)
+- **Avatars & Graphics**:
+  - 20 high-resolution animal avatars in `public/avatars/` generated with AI.
+  - Room theme banner illustrations:
+    - General: [Pinterest](https://hu.pinterest.com/pin/773282198541351807/)
+    - Family: [Pinterest](https://hu.pinterest.com/pin/829788300128379428/)
+    - School: [Pinterest](https://hu.pinterest.com/pin/3025924747032999/)
+    - Workplace: [Pinterest](https://hu.pinterest.com/pin/11047961580956266/)
+- **Icons**: [Lucide React](https://lucide.dev/) and [React Icons](https://react-icons.github.io/react-icons/).
 
 ---
 

@@ -1,6 +1,10 @@
-# GiftMate — Modern, Valós Idejű Secret Santa Platform
+<div align="center">
 
-[English](README.md) | **Magyar**
+# GiftMate
+
+**Modern, full-stack, valós idejű Secret Santa platform.**
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-giftmate--sooty.vercel.app-blueviolet?style=for-the-badge)](https://giftmate-sooty.vercel.app/)
 
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -8,8 +12,12 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3FCF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://vercel.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://giftmate-sooty.vercel.app/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+
+[English](README.md) | **Magyar**
+
+</div>
 
 A **GiftMate** egy modern, full-stack, valós idejű Secret Santa webalkalmazás, amely **React 19**, **TypeScript**, **Tailwind CSS v4** és **Supabase (PostgreSQL)** technológiákra épül.
 
@@ -84,7 +92,7 @@ Az alkalmazás **Row Level Security (RLS)** szabályokkal, atomi **PostgreSQL t�
 ### Interaktív Demó Környezet & Szerepkör Védelem
 
 - **Nyilvános Demó Fiók Védelem**: A nyilvános bemutató fiók (`demo@giftmate.app`) védve van az e-mail cím módosításától, a jelszó-visszaállítástól és a fióktörléstől mind a felületen, mind a PostgreSQL RPC szintjén.
-- **Védett Demó Szoba (`U1J1TN`)**: Előre konfigurált, fiktív résztvevőkkel feltöltött szoba, ahol a destruktív műveletek (szoba törlése, tagok eltávolítása, kilépés, új tagok csatlakozása) adatbázis-szinten blokkolva vannak, miközben a szoba testreszabása és a sorsolási folyamat szabadon kipróbálható.
+- **Védett Demó Szoba**: Előre konfigurált, fiktív résztvevőkkel feltöltött szoba, ahol a destruktív műveletek (szoba törlése, tagok eltávolítása, kilépés, új tagok csatlakozása) adatbázis-szinten blokkolva vannak, miközben a szoba testreszabása és a sorsolási folyamat szabadon kipróbálható.
 - **Vizuális Állapotjelvények**: Megkülönböztető `VÉDETT` lakat (`Lock`) jelvénnyel rendelkezik a vezérlőpulti kártyán és a szoba címsorában.
 
 ### UX Optimalizációk & Dinamikus Névsor-Prioritás
@@ -230,6 +238,25 @@ Az adatbázis séma és a GiftMate által használt PostgreSQL függvények a `s
 - **`reveal_my_draw`**: Nyilvántartja, hogy a résztvevő megtekintette-e már a kisorsolt partnerét.
 - **`update_profile_username`**: Szobaszinten egyedi megjelenített nevet követel meg az azonos nevű résztvevők elkerülése érdekében.
 - **`delete_current_user`**: Biztonságosan törli a fiókadatokat, miközben védi a nyilvános demó profilt a törléstől.
+
+---
+
+## Köszönetnyilvánítás & Források
+
+- **Vektoros Animációk**: Hardveresen gyorsított Lottie animációk a [@lottiefiles/dotlottie-react](https://lottiefiles.com/) segítségével:
+  - [Karácsonyi Harangjáték](https://lottiefiles.com/free-animation/christmas-wind-chimes-tB4neGTtaS) (LottieFiles Közösség)
+  - [Ajándékdoboz Kibontás](https://lottiefiles.com/free-animation/referral-gift-wrnR6uNcE4) (LottieFiles Közösség)
+  - [Homokóra Betöltő](https://lottiefiles.com/free-animation/time-hourglass-H3UkbK6hVS) (LottieFiles Közösség)
+  - [Konfetti Ünneplés](https://lottiefiles.com/free-animation/confetti-ixxUbTQ3Fn) (LottieFiles Közösség)
+  - [Animált Pipa / Checkmark](https://lottiefiles.com/free-animation/checkmark-EUqSK4A5c8) (LottieFiles Közösség)
+- **Avatárok & Grafikák**:
+  - 20 egyedi nagyfelbontású állatfigura a `public/avatars/` mappában, AI segítségével generálva.
+  - Szoba téma banner illusztrációk:
+    - Általános (General): [Pinterest](https://hu.pinterest.com/pin/773282198541351807/)
+    - Család (Family): [Pinterest](https://hu.pinterest.com/pin/829788300128379428/)
+    - Iskola (School): [Pinterest](https://hu.pinterest.com/pin/3025924747032999/)
+    - Munkahely (Work): [Pinterest](https://hu.pinterest.com/pin/11047961580956266/)
+- **Ikonkészlet**: [Lucide React](https://lucide.dev/) és [React Icons](https://react-icons.github.io/react-icons/).
 
 ---
 
