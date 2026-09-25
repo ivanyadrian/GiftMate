@@ -12,6 +12,8 @@
   "dependencies": {
     "@lottiefiles/dotlottie-react": "^0.19.14",
     "@supabase/supabase-js": "^2.112.3",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "lucide-react": "^1.31.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

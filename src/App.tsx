@@ -5,6 +5,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Suspense, lazy } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 import Navbar from "./components/Navbar";
 import LottieLoader from "./components/LottieLoader";
 import ScrollToTop from "./components/ScrollToTop";
@@ -25,6 +27,8 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
+      <SpeedInsights />
+      <Analytics />
       <div className="bg-background min-h-dvh flex flex-col justify-center items-center">
         <Navbar />
         <main className="flex-1 w-full">
