@@ -17,6 +17,9 @@ const CreateRoom = lazy(() => import("./pages/CreateRoom"));
 const RoomDetails = lazy(() => import("./pages/RoomDetails"));
 const UpdatePassword = lazy(() => import("./pages/UpdatePassword"));
 const Profile = lazy(() => import("./pages/Profile"));
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const Faq = lazy(() => import("./pages/Faq"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 export default function App() {
   return (
@@ -41,11 +44,14 @@ export default function App() {
               <Route path="/create-room" element={<CreateRoom />} />
               <Route path="/room/:id" element={<RoomDetails />} />
               <Route path="/update-password" element={<UpdatePassword />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/faq" element={<Faq />} />
+              <Route path="/contact" element={<Contact />} />
             </Routes>
           </Suspense>
         </main>
         <footer className="mt-8 mb-2 text-center text-xs text-slate-400">
-          © 2026 - Made by Ivány Adrián
+          © 2026 - Made by Adrián Ivány
         </footer>
       </div>
     </Router>

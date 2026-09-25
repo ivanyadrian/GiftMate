@@ -6,9 +6,9 @@ import type { User } from "@supabase/supabase-js";
 
 // Navigation links configuration used across both desktop and mobile views
 const NAV_LINKS = [
-  { label: "Hogyan működik?", href: "#" },
-  { label: "GY.I.K.", href: "#" },
-  { label: "Kapcsolat", href: "#" },
+  { label: "Hogyan működik?", href: "/how-it-works" },
+  { label: "GY.I.K.", href: "/faq" },
+  { label: "Kapcsolat", href: "/contact" },
 ];
 
 /**
@@ -147,13 +147,13 @@ export default function Navbar() {
       {/* Desktop Navigation */}
       <div className="hidden md:flex items-center gap-6">
         {NAV_LINKS.map((link) => (
-          <a
+          <Link
             key={link.label}
-            href={link.href}
+            to={link.href}
             className="text-emerald-500 hover:text-emerald-600 font-medium cursor-pointer"
           >
             {link.label}
-          </a>
+          </Link>
         ))}
 
         {user && profile && (
@@ -226,7 +226,7 @@ export default function Navbar() {
       {/* Dimmed backdrop overlay */}
       <div
         onClick={() => setIsOpen(false)}
-        className={`fixed inset-0 z-40 md:hidden transition-all duration-300 ease-out ${
+        className={`fixed inset-0 z-40 h-lvh md:hidden transition-all duration-300 ease-out ${
           isOpen
             ? "opacity-100 backdrop-blur-sm pointer-events-auto"
             : "opacity-0 backdrop-blur-none pointer-events-none"
@@ -235,7 +235,7 @@ export default function Navbar() {
 
       {/* Slide-out mobile menu panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-64 bg-surface shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"} md:hidden`}
+        className={`fixed top-0 right-0 h-lvh w-64 bg-surface shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"} md:hidden`}
       >
         {/* Drawer header: Close button */}
         <div className="p-4 flex items-center justify-end">
@@ -288,14 +288,14 @@ export default function Navbar() {
         {/* Navigation menu items */}
         <div className="flex flex-col gap-6 mt-2 px-8">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.label}
-              href={link.href}
+              to={link.href}
               className="text-lg text-emerald-500 hover:text-emerald-600 font-semibold transition-colors border-b border-slate-200 pb-2 cursor-pointer"
               onClick={() => setIsOpen(false)}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
       </div>

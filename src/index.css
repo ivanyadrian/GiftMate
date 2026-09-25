@@ -115,7 +115,7 @@
   .input-field {
     @apply w-full px-4 py-3 rounded-lg border border-slate-200 text-slate-800 text-sm 
            focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 
-           transition-all placeholder:text-slate-400;
+           transition-colors placeholder:text-slate-400;
   }
 
   /* Date and time picker icons */
