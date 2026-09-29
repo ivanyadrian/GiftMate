@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
+/**
+ * Props for the ErrorToast notification component.
+ */
 interface ErrorToastProps {
   message: string;
   onClose: () => void;
   duration?: number;
 }
 
+/**
+ * ErrorToast Component
+ *
+ * Fixed-position notification banner for presenting error alerts:
+ * - Animated slide-in and slide-out transitions.
+ * - Progress bar visualizing remaining display duration.
+ * - Accessible alert role with manual dismiss button.
+ */
 export default function ErrorToast({
   message,
   onClose,

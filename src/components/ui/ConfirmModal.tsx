@@ -11,7 +11,14 @@ import {
   HelpCircle,
 } from "lucide-react";
 
+/**
+ * Visual styling theme for the confirm modal action button.
+ */
 export type ConfirmVariant = "danger" | "warning" | "emerald" | "primary";
+
+/**
+ * Preset icon identifier rendered inside the modal header badge.
+ */
 export type ConfirmIconType =
   | "danger"
   | "warning"
@@ -22,6 +29,9 @@ export type ConfirmIconType =
   | "user-x"
   | "question";
 
+/**
+ * Props for the ConfirmModal component.
+ */
 export interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
@@ -35,6 +45,15 @@ export interface ConfirmModalProps {
   onClose: () => void;
 }
 
+/**
+ * ConfirmModal Component
+ *
+ * Generic accessible modal dialog for destructive, critical, or irreversible actions:
+ * - Backdrop blur with smooth fade-in animation and Escape key listener.
+ * - Icon-supported header with theme colors (danger, warning, emerald, info).
+ * - Asynchronous loading state preventing accidental duplicate submissions.
+ * - Clean mobile-responsive button arrangement.
+ */
 export default function ConfirmModal({
   isOpen,
   title,
@@ -47,6 +66,7 @@ export default function ConfirmModal({
   onConfirm,
   onClose,
 }: ConfirmModalProps) {
+  // Dismiss modal on Escape key press when not actively loading
   useEffect(() => {
     if (isOpen) {
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -63,6 +83,9 @@ export default function ConfirmModal({
 
   if (!isOpen) return null;
 
+  /**
+   * Renders the themed icon badge corresponding to the selected icon preset.
+   */
   const renderIcon = () => {
     switch (icon) {
       case "trash":
@@ -117,6 +140,9 @@ export default function ConfirmModal({
     }
   };
 
+  /**
+   * Resolves CSS color classes for the confirm action button based on the active variant.
+   */
   const getConfirmButtonClasses = () => {
     switch (variant) {
       case "emerald":
@@ -139,7 +165,7 @@ export default function ConfirmModal({
         onClick={(e) => e.stopPropagation()}
         className="bg-white rounded-3xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6 sm:p-7 border border-slate-100 animate-[modalPopIn_0.25s_cubic-bezier(0.16,1,0.3,1)] transform-gpu will-change-[transform,opacity] backface-hidden origin-center overscroll-contain relative flex flex-col gap-5"
       >
-        {/* Close Button */}
+        {/* Desktop Close Icon Button */}
         <button
           onClick={onClose}
           disabled={isLoading}
@@ -149,7 +175,7 @@ export default function ConfirmModal({
           <X size={18} />
         </button>
 
-        {/* Header with Icon */}
+        {/* Modal Header: Themed Icon Badge & Title */}
         <div className="flex items-center gap-4 pr-0 sm:pr-6">
           {renderIcon()}
           <h3 className="text-lg sm:text-xl font-bold text-slate-800">
@@ -157,14 +183,14 @@ export default function ConfirmModal({
           </h3>
         </div>
 
-        {/* Description */}
+        {/* Informative Body Content */}
         {description && (
           <div className="text-sm text-slate-500 leading-relaxed">
             {description}
           </div>
         )}
 
-        {/* Actions */}
+        {/* Modal Action Controls */}
         <div className="flex flex-col-reverse xs:flex-row gap-3 pt-2">
           <button
             type="button"

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import type { User } from "@supabase/supabase-js";
+import AvatarImage from "./ui/AvatarImage";
 
 // Navigation links configuration used across both desktop and mobile views
 const NAV_LINKS = [
@@ -163,7 +164,7 @@ export default function Navbar() {
           >
             <div className="w-8 h-8 rounded-full border-2 border-white group-hover:border-emerald-300 overflow-hidden transition-all shadow-sm shrink-0">
               {profile.avatar_url && !avatarError ? (
-                <img
+                <AvatarImage
                   key={profile.avatar_url}
                   src={profile.avatar_url}
                   onError={() => setAvatarError(true)}
@@ -194,7 +195,7 @@ export default function Navbar() {
           >
             <div className="w-7 h-7 rounded-full border-2 border-white group-hover:border-emerald-300 overflow-hidden transition-all shadow-sm shrink-0">
               {profile.avatar_url && !avatarError ? (
-                <img
+                <AvatarImage
                   key={profile.avatar_url}
                   src={profile.avatar_url}
                   onError={() => setAvatarError(true)}
@@ -261,7 +262,7 @@ export default function Navbar() {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full border-2 border-white group-hover:border-emerald-300 overflow-hidden transition-all shadow-sm shrink-0">
                   {profile.avatar_url && !avatarError ? (
-                    <img
+                    <AvatarImage
                       key={profile.avatar_url}
                       src={profile.avatar_url}
                       onError={() => setAvatarError(true)}

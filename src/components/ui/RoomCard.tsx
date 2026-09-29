@@ -10,23 +10,43 @@ import {
   Lock,
 } from "lucide-react";
 
+/**
+ * Properties for the RoomCard component.
+ */
 export interface RoomCardProps {
+  /** Display name of the room */
   roomName: string;
+  /** Event theme identifier ('christmas', 'work', 'school', 'family', or 'general') */
   eventType: string;
+  /** Whether an optional budget limit has been configured */
   hasBudget: boolean;
+  /** Recommended spending amount or null if unspecified */
   budgetAmount: string | number | null;
+  /** Currency code ('HUF', 'EUR', 'USD', etc.) */
   currency: string;
+  /** Physical or virtual gift exchange location */
   location: string;
+  /** Scheduled gift exchange date (YYYY-MM-DD) */
   eventDate: string;
+  /** Scheduled gift exchange time (HH:MM:SS) */
   eventTime: string;
+  /** Detailed guidelines, rules, or greeting message */
   description: string;
+  /** Draw execution mode: 'manual' or 'auto' */
   drawType: string;
+  /** Automatic draw execution date */
   drawDate: string;
+  /** Automatic draw execution time */
   drawTime: string;
+  /** Total number of registered room participants */
   memberCount: number;
+  /** When true, clamps long titles to single line for denser dashboard views */
   simplified?: boolean;
+  /** Whether pairs have already been generated */
   isDrawn?: boolean;
+  /** Whether the room is a protected public demonstration room */
   isLocked?: boolean;
+  /** Optional CTA button configuration rendered at the card bottom */
   actionButton?: {
     text: string;
     onClick?: () => void;
@@ -35,6 +55,18 @@ export interface RoomCardProps {
   };
 }
 
+/**
+ * RoomCard Component
+ *
+ * Reusable visual card representation of a Secret Santa room:
+ * - Theme-specific banner image overlay with fallback gradient styling.
+ * - Live member count badge and protected demo room indicator.
+ * - Draw progress indicator pill ('Kisorsolva' or 'Sorsolásra vár').
+ * - Location, event date/time, and currency-formatted budget badge.
+ * - Compact 1-line description bar with ellipsis truncation or 'Leírás - nincs' fallback.
+ * - Draw parameters block displaying manual trigger or countdown time.
+ * - Primary navigation action button linking to room details.
+ */
 export default function RoomCard({
   roomName,
   eventType,
@@ -54,6 +86,9 @@ export default function RoomCard({
   isLocked = false,
   actionButton,
 }: RoomCardProps) {
+  /**
+   * Resolves the theme banner illustration path matching the room's event type.
+   */
   const getBannerImage = () => {
     switch (eventType) {
       case "christmas":
@@ -69,6 +104,9 @@ export default function RoomCard({
     }
   };
 
+  /**
+   * Resolves the theme background gradient classes matching the room's event type.
+   */
   const getBannerColor = () => {
     switch (eventType) {
       case "work":
@@ -82,9 +120,15 @@ export default function RoomCard({
     }
   };
 
+  /**
+   * Truncates time string to HH:MM format.
+   */
   const formatTime = (timeStr?: string) =>
     timeStr ? timeStr.slice(0, 5) : "-";
 
+  /**
+   * Formats ISO currency strings into readable currency symbols.
+   */
   const formatCurrency = (curr?: string) => {
     if (!curr) return "Ft";
     if (curr === "HUF" || curr === "Ft") return "Ft";
@@ -95,7 +139,7 @@ export default function RoomCard({
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 flex flex-col h-auto hover:shadow-md transition-shadow transform-gpu min-w-70">
-      {/* Kártya Fejléc Kép / Gradiens */}
+      {/* Top Banner Graphic & Gradients */}
       <div
         className={`h-32 sm:h-40 ${getBannerColor()} relative flex items-center justify-center shrink-0 overflow-hidden transform-gpu`}
       >
@@ -109,7 +153,7 @@ export default function RoomCard({
         ></div>
         <div className="absolute inset-0 bg-black/15 pointer-events-none"></div>
 
-        {/* Létszám és zárolási státusz a jobb felső sarokban */}
+        {/* Member Count & Protected Demo Badges */}
         <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10">
           <div className="bg-white/30 backdrop-blur-md px-3.5 py-1 rounded-full text-white text-[11px] font-bold tracking-wider border border-white/40 shadow-xs flex items-center gap-1.5 select-none">
             <Users className="w-3.5 h-3.5 stroke-3" />
@@ -127,7 +171,7 @@ export default function RoomCard({
           )}
         </div>
 
-        {/* Sorsolás állapota tab badge középen alul a fehér kártya mögött, a banner előtt */}
+        {/* Draw Status Indicator Pill */}
         <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 z-0 pointer-events-none">
           {isDrawn ? (
             <div className="bg-emerald-600/90 backdrop-blur-md px-3.5 pt-1.5 pb-2.5 rounded-t-xl text-white text-[10px] font-bold tracking-wider border-t border-x border-emerald-300/40 shadow-xs flex items-center gap-1.5 whitespace-nowrap">
@@ -143,8 +187,10 @@ export default function RoomCard({
         </div>
       </div>
 
+      {/* Card Body Content */}
       <div className="p-4 sm:p-8 flex-1 flex flex-col bg-white relative z-10">
-        <div className="mb-6">
+        {/* Room Title, Location, and Budget Overview */}
+        <div className="mb-4">
           <h3
             className={`text-xl font-bold text-slate-800 leading-tight wrap-break-words mb-4 flex items-center gap-2 ${simplified ? "line-clamp-1" : "line-clamp-2"}`}
           >
@@ -211,13 +257,24 @@ export default function RoomCard({
           </div>
         </div>
 
-        {!simplified && (
-          <div className="bg-slate-50/80 rounded-2xl p-4 text-sm text-slate-500 italic mb-8 border border-slate-100/50">
-            {description ||
-              "A leírásod itt fog megjelenni, amint megadod a 2. lépésben..."}
-          </div>
-        )}
+        {/* Compact Description Bar with Ellipsis or Empty State */}
+        <div className="w-full bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2 text-xs mb-4">
+          {description && description.trim() ? (
+            <p
+              className="truncate text-slate-600 font-medium"
+              title={description}
+            >
+              {description}
+            </p>
+          ) : (
+            <div className="flex items-center justify-between w-full select-none">
+              <span className="font-semibold text-slate-600">Leírás</span>
+              <span className="font-medium text-slate-400">nincs</span>
+            </div>
+          )}
+        </div>
 
+        {/* Draw Parameters Information Box */}
         <div
           className={`py-3.5 px-4 rounded-2xl border border-emerald-100/60 flex flex-col gap-3 bg-emerald-50/40 ${
             actionButton ? "mb-8" : "mb-0"
@@ -237,6 +294,7 @@ export default function RoomCard({
             </div>
           </div>
 
+          {/* Automatic Draw Schedule */}
           {drawType === "auto" && (drawDate || drawTime) && (
             <div className="flex items-center justify-end gap-3 border-t border-emerald-200/50 pt-3 shrink min-w-0 w-full text-right">
               <div className="flex flex-col items-end">
@@ -264,6 +322,7 @@ export default function RoomCard({
             </div>
           )}
 
+          {/* Manual Draw Indicator */}
           {drawType === "manual" && (
             <div className="flex items-center justify-end gap-3 border-t border-emerald-200/50 pt-3 shrink min-w-0 w-full text-right">
               <div className="flex flex-col items-end">
@@ -282,6 +341,7 @@ export default function RoomCard({
           )}
         </div>
 
+        {/* Action Button */}
         {actionButton && (
           <button
             onClick={actionButton.onClick}

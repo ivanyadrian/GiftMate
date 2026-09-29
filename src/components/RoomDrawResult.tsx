@@ -15,6 +15,7 @@ import {
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import giftAnimation from "../assets/animations/gift.lottie";
 import confettiAnimation from "../assets/animations/confetti.lottie";
+import AvatarImage from "./ui/AvatarImage";
 
 interface RoomDrawResultProps {
   room: any;
@@ -235,7 +236,7 @@ export default function RoomDrawResult({
                       <UserRoundMinus className="w-12 h-12 sm:w-14 sm:h-14 text-slate-500" />
                     </div>
                   ) : myDrawnUser.avatar_url && !avatarError ? (
-                    <img
+                    <AvatarImage
                       src={myDrawnUser.avatar_url}
                       alt={myDrawnUser.username}
                       onError={() => setAvatarError(true)}

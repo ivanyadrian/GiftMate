@@ -7,6 +7,8 @@ import {
   Check,
   SquareUserRound,
   X,
+  Image as ImageIcon,
+  Folder,
 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 
@@ -16,17 +18,31 @@ import {
   extractStoragePath,
   getGoogleAvatarUrl,
 } from "../../utils/avatar";
+import ImageCropperModal from "./ImageCropperModal";
+import AvatarImage from "./AvatarImage";
 
+/**
+ * Props for the ProfileSetupModal component.
+ */
 interface ProfileSetupModalProps {
   userId: string;
-  initialAvatarUrl?: string | null; // Existing avatar URL if editing
-  initialDisplayName?: string | null; // Existing display name if editing
-  googleAvatarUrl?: string | null; // Pre-resolved Google avatar URL for instant 0ms render
+  initialAvatarUrl?: string | null;
+  initialDisplayName?: string | null;
+  googleAvatarUrl?: string | null;
   onComplete: (avatarUrl?: string | null) => void;
   onCancel?: () => void;
   avatarOnlyMode?: boolean;
 }
 
+/**
+ * ProfileSetupModal Component
+ *
+ * Multi-step modal wizard for initial user profile onboarding or avatar customization:
+ * - Step 1: Avatar selection (preset animal avatars, Google OAuth photo, or custom file upload).
+ * - Step 2: Display name input and validation (skipped when avatarOnlyMode is active).
+ * - Handles Supabase Storage uploads with automatic cleanup of obsolete previous images.
+ * - Dispatches 'profileUpdated' window event to keep the global application state in sync.
+ */
 export default function ProfileSetupModal({
   userId,
   initialAvatarUrl,
@@ -43,6 +59,21 @@ export default function ProfileSetupModal({
   const [googleAvatarUrl, setGoogleAvatarUrl] = useState<string | null>(
     () => initialGoogleAvatarUrl || null,
   );
+
+  // Detect if client device is a mobile phone or tablet (to offer native instant camera capture)
+  const [isMobileOrTablet] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const ua = navigator.userAgent || "";
+    const isMobileUA =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    const isIPadOS = navigator.maxTouchPoints > 1 && /Macintosh/i.test(ua);
+    const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    return (
+      isMobileUA ||
+      isIPadOS ||
+      (hasTouch && window.matchMedia("(pointer: coarse)").matches)
+    );
+  });
 
   // List of available avatars, initialized synchronously for instant 0ms render
   const [avatarsList, setAvatarsList] = useState<string[]>(() => {
@@ -83,6 +114,9 @@ export default function ProfileSetupModal({
   const [file, setFile] = useState<File | null>(null);
   // Ephemeral blob URL for instant client-side preview of selected local image
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Temporary source image URL for interactive cropping modal
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropFileName, setCropFileName] = useState<string>("avatar.jpg");
 
   const [displayName, setDisplayName] = useState(initialDisplayName || "");
   const [loading, setLoading] = useState(false);
@@ -156,8 +190,9 @@ export default function ProfileSetupModal({
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (cropImageSrc) URL.revokeObjectURL(cropImageSrc);
     };
-  }, [previewUrl]);
+  }, [previewUrl, cropImageSrc]);
 
   // Keyboard accessibility: dismiss modal on Escape key press if cancellation is permitted
   useEffect(() => {
@@ -204,13 +239,17 @@ export default function ProfileSetupModal({
 
     try {
       if (selectedAvatar === "custom_upload" && file) {
-        // Upload custom image to Supabase Storage
-        const fileExt = file.name.split(".").pop();
-        const fileName = `user_uploads/${userId}-${Math.random()}.${fileExt}`;
+        // Upload custom image to Supabase Storage with explicit content-type and cache control
+        const fileExt = file.name.split(".").pop() || "jpg";
+        const fileName = `user_uploads/${userId}-${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from("avatars")
-          .upload(fileName, file);
+          .upload(fileName, file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: file.type || "image/jpeg",
+          });
 
         if (uploadError) throw uploadError;
 
@@ -231,27 +270,26 @@ export default function ProfileSetupModal({
       );
       if (rpcError) throw rpcError;
 
-      // 2. Update user metadata in Supabase Auth
-      const { error: updateAuthError } = await supabase.auth.updateUser({
-        data: {
-          avatar_url: finalAvatarUrl,
-          display_name: displayName.trim(),
-        },
-      });
+      // 2. Concurrently update user metadata in Supabase Auth & public.profiles table
+      const [authResult, profileResult] = await Promise.all([
+        supabase.auth.updateUser({
+          data: {
+            avatar_url: finalAvatarUrl,
+            display_name: displayName.trim(),
+          },
+        }),
+        supabase
+          .from("profiles")
+          .update({
+            avatar_url: finalAvatarUrl,
+            is_profile_complete: true,
+          })
+          .eq("id", userId),
+      ]);
 
-      if (updateAuthError) throw updateAuthError;
-
-      // 3. Update profiles table so avatar and completion reflect immediately
-      const { error: updateProfileError } = await supabase
-        .from("profiles")
-        .update({
-          avatar_url: finalAvatarUrl,
-          is_profile_complete: true,
-        })
-        .eq("id", userId);
-
-      if (updateProfileError) {
-        console.error("Failed to update profiles table:", updateProfileError);
+      if (authResult.error) throw authResult.error;
+      if (profileResult.error) {
+        console.error("Failed to update profiles table:", profileResult.error);
       }
 
       // Delete previously uploaded custom image from Storage if replaced
@@ -290,12 +328,16 @@ export default function ProfileSetupModal({
     try {
       // Handle custom file upload if selected
       if (selectedAvatar === "custom_upload" && file) {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `user_uploads/${userId}-${Math.random()}.${fileExt}`;
+        const fileExt = file.name.split(".").pop() || "jpg";
+        const fileName = `user_uploads/${userId}-${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from("avatars")
-          .upload(fileName, file);
+          .upload(fileName, file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: file.type || "image/jpeg",
+          });
 
         if (uploadError) throw uploadError;
 
@@ -306,27 +348,25 @@ export default function ProfileSetupModal({
         finalAvatarUrl = publicUrl;
       }
 
-      // 1. Update avatar metadata in Supabase Auth
-      const { error: updateAuthError } = await supabase.auth.updateUser({
-        data: { avatar_url: finalAvatarUrl },
-      });
+      // Concurrently update avatar metadata in Supabase Auth & public.profiles table
+      const [authResult, profileResult] = await Promise.all([
+        supabase.auth.updateUser({
+          data: { avatar_url: finalAvatarUrl },
+        }),
+        supabase
+          .from("profiles")
+          .update({ avatar_url: finalAvatarUrl, is_profile_complete: true })
+          .eq("id", userId),
+      ]);
 
-      if (updateAuthError) throw updateAuthError;
-
-      // 2. Update avatar_url in public.profiles table
-      const { error: updateProfileError } = await supabase
-        .from("profiles")
-        .update({ avatar_url: finalAvatarUrl, is_profile_complete: true })
-        .eq("id", userId);
-
-      if (updateProfileError) {
-        console.error("Failed to update profiles table:", updateProfileError);
+      if (authResult.error) throw authResult.error;
+      if (profileResult.error) {
+        console.error("Failed to update profiles table:", profileResult.error);
       }
 
       // Delete previously uploaded custom image from Storage if replaced
       const oldPath = extractStoragePath(initialAvatarUrl);
       const newPath = extractStoragePath(finalAvatarUrl);
-
       if (oldPath && oldPath !== newPath) {
         await supabase.storage
           .from("avatars")
@@ -348,21 +388,54 @@ export default function ProfileSetupModal({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
-      setFile(selectedFile);
 
-      // Clean up previous blob URL to prevent memory leaks
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+      // If SVG or animated GIF, bypass cropping
+      if (
+        selectedFile.type === "image/svg+xml" ||
+        selectedFile.type === "image/gif"
+      ) {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setFile(selectedFile);
+        const newPreviewUrl = URL.createObjectURL(selectedFile);
+        setPreviewUrl(newPreviewUrl);
+        setSelectedAvatar("custom_upload");
+        setError(null);
+      } else {
+        // Open interactive crop modal for photos
+        if (cropImageSrc) {
+          URL.revokeObjectURL(cropImageSrc);
+        }
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setCropImageSrc(objectUrl);
+        setCropFileName(selectedFile.name);
       }
-
-      // Generate instant client-side preview URL
-      const newPreviewUrl = URL.createObjectURL(selectedFile);
-      setPreviewUrl(newPreviewUrl);
-      setSelectedAvatar("custom_upload");
-      setError(null);
 
       // Reset file input so selecting the same file again still fires onChange
       e.target.value = "";
+    }
+  };
+
+  // Called when user finishes cropping in the ImageCropperModal
+  const handleCropComplete = (croppedFile: File) => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    if (cropImageSrc) {
+      URL.revokeObjectURL(cropImageSrc);
+      setCropImageSrc(null);
+    }
+    const newPreviewUrl = URL.createObjectURL(croppedFile);
+    setFile(croppedFile);
+    setPreviewUrl(newPreviewUrl);
+    setSelectedAvatar("custom_upload");
+    setError(null);
+  };
+
+  // Called when user cancels cropping in the ImageCropperModal
+  const handleCropCancel = () => {
+    if (cropImageSrc) {
+      URL.revokeObjectURL(cropImageSrc);
+      setCropImageSrc(null);
     }
   };
 
@@ -504,7 +577,7 @@ export default function ProfileSetupModal({
                         : undefined
                     }
                   >
-                    <img
+                    <AvatarImage
                       src={url}
                       alt="Avatar"
                       className="w-full h-full object-cover"
@@ -540,23 +613,58 @@ export default function ProfileSetupModal({
                 <div className="flex-1 h-px bg-slate-100"></div>
               </div>
 
-              {/* Custom Image File Upload Dropzone */}
+              {/* Custom Image Upload Buttons */}
               <div className="mb-4">
-                <label className="flex items-center justify-center gap-3 w-full py-2.5 sm:py-3 px-4 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-emerald-300 transition-colors">
-                  <Camera className="w-5 h-5 text-slate-400 shrink-0" />
-                  <p className="text-xs sm:text-sm text-slate-600">
-                    <span className="font-semibold text-emerald-600">
-                      Kattints ide
-                    </span>{" "}
-                    saját kép feltöltéséhez
-                  </p>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </label>
+                {isMobileOrTablet ? (
+                  /* Mobile & Tablet: Two side-by-side buttons for instant camera selfie or gallery picker */
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    {/* Take Photo with Camera */}
+                    <label className="flex items-center justify-center gap-2 py-2.5 sm:py-3 px-3 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-emerald-400 transition-all active:scale-[0.99] group text-center">
+                      <Camera className="w-4 h-4 text-emerald-600 shrink-0 group-hover:scale-110 transition-transform" />
+                      <span className="text-xs sm:text-sm font-medium text-slate-700 truncate">
+                        Fotó készítése
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="user"
+                        className="hidden"
+                        onChange={handleFileChange}
+                      />
+                    </label>
+
+                    {/* Choose from Gallery / Files */}
+                    <label className="flex items-center justify-center gap-2 py-2.5 sm:py-3 px-3 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-emerald-400 transition-all active:scale-[0.99] group text-center">
+                      <ImageIcon className="w-4 h-4 text-slate-500 shrink-0 group-hover:scale-110 transition-transform" />
+                      <span className="text-xs sm:text-sm font-medium text-slate-700 truncate">
+                        Kép választása
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileChange}
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  /* PC & Desktop: Clean single full-width upload button */
+                  <label className="flex items-center justify-center gap-3 w-full py-2.5 sm:py-3 px-4 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-emerald-300 transition-colors">
+                    <Folder className="w-5 h-5 text-slate-400 shrink-0" />
+                    <p className="text-xs sm:text-sm text-slate-600">
+                      <span className="font-semibold text-emerald-600">
+                        Kattints ide
+                      </span>{" "}
+                      saját kép feltöltéséhez
+                    </p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                )}
               </div>
 
               {/* Step 1 Action Buttons */}
@@ -648,6 +756,16 @@ export default function ProfileSetupModal({
           </div>
         )}
       </div>
+
+      {/* Interactive Image Cropper Modal */}
+      {cropImageSrc && (
+        <ImageCropperModal
+          imageSrc={cropImageSrc}
+          fileName={cropFileName}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }

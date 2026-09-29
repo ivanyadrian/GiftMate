@@ -4,16 +4,28 @@ import { X, LoaderCircle } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import CheckmarkAnimation from "../../assets/animations/checkmark.lottie";
 
-// Component props: control visibility and handle close requests
+/**
+ * Props for the ForgotPasswordModal component.
+ */
 interface ForgotPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+/**
+ * ForgotPasswordModal Component
+ *
+ * Provides a dialog for initiating the password reset flow:
+ * - Validates input and triggers Supabase `auth.resetPasswordForEmail`.
+ * - Prevents password reset for the shared public demonstration account.
+ * - Displays a Lottie checkmark animation upon successful dispatch.
+ * - Supports keyboard dismissal via Escape key and backdrop clicks.
+ */
 export default function ForgotPasswordModal({
   isOpen,
   onClose,
 }: ForgotPasswordModalProps) {
+  // --- Form State Management ---
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,11 +54,16 @@ export default function ForgotPasswordModal({
   // Don't render anything if modal is not open
   if (!isOpen) return null;
 
-  // Dispatch password reset email via Supabase Auth
+  /**
+   * Dispatches the password recovery email via Supabase Auth.
+   * Redirects the user to /update-password upon link activation.
+   */
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    // Safeguard the demo account credentials
     if (email.trim().toLowerCase() === "demo@giftmate.app") {
       setError(
         "A nyilvános demó fiók jelszava biztonsági okokból nem állítható vissza!",
@@ -77,7 +94,7 @@ export default function ForgotPasswordModal({
         onClick={(e) => e.stopPropagation()}
         className="bg-white rounded-3xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-[modalPopIn_0.25s_cubic-bezier(0.16,1,0.3,1)] transform-gpu will-change-[transform,opacity] backface-hidden origin-center overscroll-contain"
       >
-        {/* Header */}
+        {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <h2 className="text-lg font-bold text-slate-800">
             Elfelejtett jelszó
@@ -91,9 +108,10 @@ export default function ForgotPasswordModal({
           </button>
         </div>
 
-        {/* Body */}
+        {/* Modal Body */}
         <div className="p-4 xs:p-6 overflow-y-auto overscroll-contain">
           {success ? (
+            /* Success Feedback State */
             <div className="text-center py-4">
               <div className="mx-auto flex items-center justify-center w-24 h-24 mb-2">
                 <DotLottieReact
@@ -116,6 +134,7 @@ export default function ForgotPasswordModal({
               </button>
             </div>
           ) : (
+            /* Reset Request Form */
             <>
               <p className="text-sm text-slate-500 mb-6">
                 Kérlek, add meg a regisztrációhoz használt e-mail címedet, és mi
@@ -147,6 +166,7 @@ export default function ForgotPasswordModal({
                   />
                 </div>
 
+                {/* Form Controls */}
                 <div className="flex flex-col min-[300px]:flex-row gap-3 pt-2">
                   <button
                     type="button"

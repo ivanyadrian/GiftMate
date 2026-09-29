@@ -23,6 +23,15 @@ const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const Faq = lazy(() => import("./pages/Faq"));
 const Contact = lazy(() => import("./pages/Contact"));
 
+/**
+ * Root Application Component
+ *
+ * Configures the primary single-page application router, layout structure, and monitoring:
+ * - BrowserRouter setup with automatic window scroll reset via ScrollToTop.
+ * - Performance and visitor tracking powered by Vercel Speed Insights and Web Analytics.
+ * - Code-split route management with lazy loading and fallback Lottie loader animation.
+ * - Persistent navigation header (Navbar) and footer across all view states.
+ */
 export default function App() {
   return (
     <Router>

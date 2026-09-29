@@ -308,6 +308,15 @@ export default function Dashboard() {
   };
 
   /**
+   * Handles completion of mandatory initial profile setup (avatar & display name).
+   * Refreshes user auth/profile data and redirects first-time users to the "Hogyan működik?" onboarding guide.
+   */
+  const handleInitialSetupComplete = async () => {
+    await refreshUser();
+    navigate("/how-it-works");
+  };
+
+  /**
    * Session Guard & Lifecycle Hook:
    * Verifies authenticated session on mount and listens for auth state changes.
    */
@@ -415,10 +424,13 @@ export default function Dashboard() {
             profile?.avatar_url || user.user_metadata?.avatar_url
           }
           initialDisplayName={
-            profile?.username || user.user_metadata?.display_name
+            profile?.username ||
+            user.user_metadata?.display_name ||
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name
           }
           googleAvatarUrl={getGoogleAvatarUrl(user)}
-          onComplete={refreshUser}
+          onComplete={handleInitialSetupComplete}
         />
       )}
 

@@ -15,6 +15,7 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import ProfileSetupModal from "../components/ui/ProfileSetupModal";
+import AvatarImage from "../components/ui/AvatarImage";
 import { extractStoragePath, getGoogleAvatarUrl } from "../utils/avatar";
 
 /**
@@ -391,7 +392,7 @@ export default function Profile() {
             >
               <div className="w-32 h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-md relative">
                 {profile.avatar_url && !avatarError ? (
-                  <img
+                  <AvatarImage
                     key={profile.avatar_url}
                     src={profile.avatar_url}
                     onError={() => setAvatarError(true)}

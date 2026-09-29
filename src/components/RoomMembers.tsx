@@ -12,6 +12,9 @@ import {
   UserX,
   UserRoundMinus,
 } from "lucide-react";
+import MemberProfileModal from "./ui/MemberProfileModal";
+import AvatarImage from "./ui/AvatarImage";
+import { normalizeAvatarUrl } from "../utils/avatar";
 
 interface RoomMembersProps {
   members: any[];
@@ -39,6 +42,8 @@ export default function RoomMembers({
 }: RoomMembersProps) {
   // Toggle state for participant management mode (kicking participants)
   const [isManaging, setIsManaging] = useState(false);
+  // Selected participant for enlarged profile inspection modal
+  const [selectedMember, setSelectedMember] = useState<any | null>(null);
   // Tracks image load failures to gracefully render initials fallback
   const [failedAvatars, setFailedAvatars] = useState<Record<string, boolean>>(
     {},
@@ -77,6 +82,18 @@ export default function RoomMembers({
       setIsManaging(false);
     }
   }, [hasDrawn]);
+
+  // Keep selectedMember reference in sync if the room members list updates in real-time
+  useEffect(() => {
+    if (selectedMember) {
+      const freshMember = members.find(
+        (m) => m.user_id === selectedMember.user_id,
+      );
+      if (freshMember) {
+        setSelectedMember(freshMember);
+      }
+    }
+  }, [members]);
 
   // Priority sorting:
   // 1. Room organizer always appears first
@@ -191,7 +208,7 @@ export default function RoomMembers({
               const isDeleted = !!m.is_deleted;
               const avatarUrl = isDeleted
                 ? "/deleted_user.webp"
-                : m.profiles?.avatar_url;
+                : normalizeAvatarUrl(m.profiles?.avatar_url);
               const isOwnerMember = m.is_owner;
               const isMe = m.is_me;
               const drawExists = m.draw_exists;
@@ -210,7 +227,16 @@ export default function RoomMembers({
               return (
                 <div
                   key={index}
+                  onClick={() => {
+                    if (!isManaging) {
+                      setSelectedMember(m);
+                    }
+                  }}
                   className={`p-3.5 rounded-2xl border transition-all flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-3 shrink-0 ${
+                    !isManaging
+                      ? "cursor-pointer hover:border-slate-300 hover:shadow-xs active:scale-[0.99]"
+                      : ""
+                  } ${
                     isDeleted
                       ? "bg-slate-50/70 border-slate-200 opacity-85"
                       : isMe
@@ -232,7 +258,7 @@ export default function RoomMembers({
                             <UserRoundMinus className="w-5 h-5 sm:w-6 sm:h-6 text-slate-500" />
                           </div>
                         ) : avatarUrl && !failedAvatars[avatarUrl] ? (
-                          <img
+                          <AvatarImage
                             key={avatarUrl}
                             src={avatarUrl}
                             alt={username}
@@ -260,10 +286,13 @@ export default function RoomMembers({
                         {isManaging && isKickable && onKickMember && (
                           <button
                             type="button"
-                            onClick={() => onKickMember(m.user_id, username)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onKickMember(m.user_id, username);
+                            }}
                             title={`${username} eltávolítása a szobából`}
                             aria-label={`${username} eltávolítása`}
-                            className="absolute group inset-0 m-auto w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center text-center"
+                            className="absolute group inset-0 m-auto w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center text-center cursor-pointer"
                           >
                             <Trash className="w-4 h-4 ml-px group-hover:scale-120 group-hover:stroke-3 transition-all" />
                           </button>
@@ -389,6 +418,13 @@ export default function RoomMembers({
           )}
         </div>
       )}
+
+      {/* Member Profile Inspection Modal */}
+      <MemberProfileModal
+        isOpen={Boolean(selectedMember)}
+        onClose={() => setSelectedMember(null)}
+        member={selectedMember}
+      />
     </div>
   );
 }

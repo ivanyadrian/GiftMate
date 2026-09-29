@@ -112,7 +112,7 @@ export default function RoomDetails() {
       title: "Sorsolás indítása",
       description:
         "Biztosan elindítod a sorsolást? A rendszer minden résztvevőnek véletlenszerű párt sorsol!",
-      confirmText: "Sorsolás indítása",
+      confirmText: "Sorsolás",
       variant: "emerald",
       icon: "shuffle",
       onConfirm: async () => {
