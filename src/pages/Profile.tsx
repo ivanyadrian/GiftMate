@@ -13,9 +13,12 @@ import {
   Check,
   X as CloseIcon,
   LoaderCircle,
+  Bell,
 } from "lucide-react";
 import ProfileSetupModal from "../components/ui/ProfileSetupModal";
 import AvatarImage from "../components/ui/AvatarImage";
+import SuccessToast from "../components/ui/SuccessToast";
+import ErrorToast from "../components/ui/ErrorToast";
 import { extractStoragePath, getGoogleAvatarUrl } from "../utils/avatar";
 
 /**
@@ -54,6 +57,9 @@ export default function Profile() {
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [editEmail, setEditEmail] = useState("");
   const [isSavingEmail, setIsSavingEmail] = useState(false);
+
+  // --- Email Notification Settings State ---
+  const [isUpdatingNotification, setIsUpdatingNotification] = useState(false);
 
   // --- Account Deletion Modal States ---
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -351,6 +357,44 @@ export default function Profile() {
     }
   };
 
+  /**
+   * Toggles email notification preference for draw events.
+   */
+  const handleToggleEmailNotification = async () => {
+    if (!user || isUpdatingNotification) return;
+    const currentVal = profile?.email_notifications_enabled ?? true;
+    const nextVal = !currentVal;
+
+    setIsUpdatingNotification(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ email_notifications_enabled: nextVal })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      setProfile((prev: any) => ({
+        ...prev,
+        email_notifications_enabled: nextVal,
+      }));
+      setSuccessMsg(
+        nextVal
+          ? "E-mail értesítések bekapcsolva!"
+          : "E-mail értesítések kikapcsolva!",
+      );
+      setTimeout(() => setSuccessMsg(null), 3000);
+    } catch (err: any) {
+      console.error("Error updating notification settings:", err);
+      setErrorMsg("Nem sikerült módosítani az értesítési beállítást.");
+    } finally {
+      setIsUpdatingNotification(false);
+    }
+  };
+
   // --- Initial Loading Screen ---
   if (loading) {
     return (
@@ -435,18 +479,6 @@ export default function Profile() {
               ? new Date(profile.created_at).toLocaleDateString()
               : "N/A"}
           </p>
-
-          {/* Feedback Banners (Error / Success) */}
-          {errorMsg && (
-            <div className="w-full mb-6 p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600 text-center font-medium animate-in fade-in">
-              {errorMsg}
-            </div>
-          )}
-          {successMsg && (
-            <div className="w-full mb-6 p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-sm text-emerald-600 text-center font-medium animate-in fade-in">
-              {successMsg}
-            </div>
-          )}
 
           {/* Information Rows */}
           <div className="w-full space-y-4 mb-8">
@@ -586,6 +618,49 @@ export default function Profile() {
                 )}
               </div>
             </div>
+
+            {/* Email Notification Toggle Row */}
+            <div className="flex items-center justify-between gap-3 xs:gap-4 p-3 xs:p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <div className="flex items-center gap-3 xs:gap-4 min-w-0">
+                <div className="w-8 h-8 xs:w-10 xs:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-slate-400 shrink-0">
+                  <Bell className="w-4 h-4 xs:w-5 xs:h-5 text-emerald-500" />
+                </div>
+                <div className="min-w-0 pr-2">
+                  <p className="text-sm font-medium text-slate-800">
+                    E-mail értesítés sorsolásról
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Értesítést kapsz, amikor egy szobádban megtörténik a sorsolás.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                role="switch"
+                aria-checked={profile.email_notifications_enabled ?? true}
+                disabled={isUpdatingNotification}
+                onClick={handleToggleEmailNotification}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 ${
+                  (profile.email_notifications_enabled ?? true)
+                    ? "bg-emerald-500"
+                    : "bg-slate-300"
+                }`}
+                title={
+                  (profile.email_notifications_enabled ?? true)
+                    ? "Értesítések kikapcsolása"
+                    : "Értesítések bekapcsolása"
+                }
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    (profile.email_notifications_enabled ?? true)
+                      ? "translate-x-5"
+                      : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           {/* Bottom Account Actions: Logout & Permanent Deletion */}
@@ -700,6 +775,18 @@ export default function Profile() {
             );
           }}
         />
+      )}
+
+      {/* Floating Notifications (Success & Error Toasts) */}
+      {successMsg && (
+        <SuccessToast
+          message={successMsg}
+          onClose={() => setSuccessMsg(null)}
+        />
+      )}
+
+      {errorMsg && (
+        <ErrorToast message={errorMsg} onClose={() => setErrorMsg(null)} />
       )}
     </div>
   );

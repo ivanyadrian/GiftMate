@@ -1,3 +1,9 @@
+CREATE OR REPLACE FUNCTION public.perform_draw(p_room_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
     shuffled_ids UUID[];
     n INT;
@@ -5,13 +11,13 @@ DECLARE
     j INT;
     tmp UUID;
 BEGIN
-    -- 1. Purge previous ghost members and existing draw records
-    DELETE FROM room_members WHERE room_id = p_room_id AND is_deleted = TRUE;
-    DELETE FROM draws WHERE room_id = p_room_id;
+    -- 1. Purge kicked / deleted participants and previous draw records for this room
+    DELETE FROM public.room_members WHERE room_id = p_room_id AND is_deleted = TRUE;
+    DELETE FROM public.draws WHERE room_id = p_room_id;
 
-    -- 2. Fetch active participants
+    -- 2. Fetch all active participants
     SELECT ARRAY_AGG(user_id) INTO shuffled_ids
-    FROM room_members
+    FROM public.room_members
     WHERE room_id = p_room_id AND (is_deleted IS NULL OR is_deleted = FALSE);
 
     n := cardinality(shuffled_ids);
@@ -29,7 +35,7 @@ BEGIN
 
     -- 4. Create pairing derangement in a single cyclic permutation (nobody draws themselves)
     FOR i IN 1..n LOOP
-        INSERT INTO draws (room_id, drawer_id, drawn_id, is_revealed)
+        INSERT INTO public.draws (room_id, drawer_id, drawn_id, is_revealed)
         VALUES (
             p_room_id,
             shuffled_ids[i],
@@ -37,4 +43,8 @@ BEGIN
             FALSE
         );
     END LOOP;
+
+    -- 5. Dispatch automated email notifications in background via Brevo REST API and pg_net
+    PERFORM public.send_draw_notifications(p_room_id, auth.uid());
 END;
+$$;

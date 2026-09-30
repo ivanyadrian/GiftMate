@@ -4,7 +4,7 @@
 
 **A modern, full-stack, real-time Secret Santa platform.**
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-giftmate--sooty.vercel.app-blueviolet?style=for-the-badge)](https://giftmate-sooty.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-giftmate--app.vercel.app-blueviolet?style=for-the-badge)](https://giftmate-app.vercel.app/)
 
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -12,7 +12,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3FCF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://giftmate-sooty.vercel.app/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://giftmate-app.vercel.app/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 **English** | [Magyar](README.hu.md)
@@ -106,6 +106,13 @@ Built with **Row Level Security (RLS)**, atomic **PostgreSQL Stored Procedures (
 - **Lottie Vector Animations**: Seamless, lightweight micro-interactions for festive wind chimes, gift unboxing, celebrate confetti, and state loaders.
 - **Unified Avatar Ecosystem**: 20 custom WebP animal avatars, synchronous Google OAuth avatar ingestion, and direct Supabase Storage integration with automatic orphan asset cleanup.
 
+### Automated Email Notifications & Deliverability
+
+- **Background Dispatch via `pg_net`**: Automated email delivery triggered asynchronously at the database level on draw completion—ensuring reliable delivery even if no participants or organizers are currently active on the site.
+- **Transactional Infrastructure (Brevo)**: Integrated with Brevo's reputable transactional REST API and custom SMTP relay for password resets and Secret Santa draw notifications.
+- **User Preference Management**: Profile-level toggle switch enabling users to opt in or out of email notifications, with real-time optimistic Toast feedback.
+- **Intelligent Audience Segmentation**: Distinguishes between manual draws (excluding the triggering organizer) and scheduled automated draws (notifying all participants including the organizer).
+
 ---
 
 ## Technology Stack
@@ -120,6 +127,7 @@ Built with **Row Level Security (RLS)**, atomic **PostgreSQL Stored Procedures (
 | **Database & Security**  | [PostgreSQL 15](https://www.postgresql.org/), PL/pgSQL, Row Level Security (RLS) |
 | **Realtime Engine**      | Supabase Realtime Channels                                                       |
 | **Object Storage**       | Supabase Storage                                                                 |
+| **Email & Notifications**| [Brevo](https://www.brevo.com/) REST API & SMTP, PostgreSQL `pg_net`              |
 | **Hosting & Deployment** | [Vercel](https://vercel.com/)                                                    |
 
 ---

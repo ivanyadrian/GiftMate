@@ -4,7 +4,7 @@
 
 **Modern, full-stack, valós idejű Secret Santa platform.**
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-giftmate--sooty.vercel.app-blueviolet?style=for-the-badge)](https://giftmate-sooty.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-giftmate--app.vercel.app-blueviolet?style=for-the-badge)](https://giftmate-app.vercel.app/)
 
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -12,7 +12,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3FCF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://giftmate-sooty.vercel.app/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://giftmate-app.vercel.app/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 [English](README.md) | **Magyar**
@@ -106,6 +106,13 @@ Az alkalmazás **Row Level Security (RLS)** szabályokkal, atomi **PostgreSQL t�
 - **Lottie Vektoros Animációk**: Finom, hardveresen gyorsított mikro-interakciók az ünnepi harangjátékhoz, ajándék kibontásához, konfetti ünnepléshez és állapotbetöltőkhöz.
 - **Egységesített Avatár-Ökoszisztéma**: 20 egyedi nagyfelbontású WebP állatavatár, szinkron Google OAuth profilkép-beolvasás és közvetlen Supabase Storage integráció automatikus fájl takarítással.
 
+### Automatikus E-mail Értesítések & Kézbesítés
+
+- **Háttérbeli Kiküldés `pg_net` Bővítménnyel**: A sorsolás lezajlásakor közvetlenül az adatbázis szintjén aszinkron módon indított e-mail kiküldés — garantálva a kézbesítést még akkor is, ha épp egyetlen résztvevő vagy szervező sincs jelen az oldalon.
+- **Tranzakciós Infrastruktúra (Brevo)**: Hivatalos Brevo REST API és egyedi SMTP integráció a jelszó-visszaállításhoz és a Secret Santa sorsolási értesítőkhöz.
+- **Felhasználói Értesítési Beállítások**: A profilban ki-be kapcsolható értesítési preferencia valós idejű, lebegő Toast visszajelzéssel.
+- **Intelligens Címzett-Szegmentáció**: Különbséget tesz a kézi sorsolás (a sorsoló szervezőt kihagyja) és az automatikus időzített sorsolás (mindenkit értesít, a szervezőt is) között.
+
 ---
 
 ## Technológiai Stack
@@ -120,6 +127,7 @@ Az alkalmazás **Row Level Security (RLS)** szabályokkal, atomi **PostgreSQL t�
 | **Adatbázis & Biztonság**  | [PostgreSQL 15](https://www.postgresql.org/), PL/pgSQL, Row Level Security (RLS) |
 | **Valós Idejű Motor**      | Supabase Realtime Channels                                                       |
 | **Objektumtárhely**        | Supabase Storage                                                                 |
+| **E-mail & Értesítések**   | [Brevo](https://www.brevo.com/) REST API & SMTP, PostgreSQL `pg_net`              |
 | **Tárhely & Telepítés**    | [Vercel](https://vercel.com/)                                                    |
 
 ---
