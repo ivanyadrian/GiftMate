@@ -1,4 +1,4 @@
-import { Gift, Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
@@ -135,15 +135,16 @@ export default function Navbar() {
   return (
     <nav className="w-full bg-surface flex items-center px-4 py-3 sticky top-0 z-50 justify-between shadow-sm">
       {/* Logo */}
-      <div className="flex justify-center items-center">
-        <Gift className="w-7 h-7 text-red-500 mr-2" />
-        <Link
-          to="/dashboard"
-          className="text-2xl font-bold text-slate-800 tracking-wide"
-        >
+      <Link to="/dashboard" className="group flex items-center">
+        <img
+          src="/navbar_logo.svg"
+          alt="GiftMate Logo"
+          className="w-7 h-7 mr-1 object-contain transition-transform duration-400 group-hover:scale-110"
+        />
+        <span className="text-2xl font-bold text-slate-800 tracking-wide">
           GiftMate
-        </Link>
-      </div>
+        </span>
+      </Link>
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex items-center gap-6">
