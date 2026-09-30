@@ -620,46 +620,89 @@ export default function Profile() {
             </div>
 
             {/* Email Notification Toggle Row */}
-            <div className="flex items-center justify-between gap-3 xs:gap-4 p-3 xs:p-4 rounded-2xl bg-slate-50 border border-slate-100">
-              <div className="flex items-center gap-3 xs:gap-4 min-w-0">
-                <div className="w-8 h-8 xs:w-10 xs:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-slate-400 shrink-0">
+            <div className="p-3 xs:p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              {/* 2-row grid below 'sm', standard single-row flex from 'sm' upwards */}
+              <div className="grid grid-cols-[auto_1fr] sm:flex sm:items-center sm:justify-between gap-x-3 xs:gap-x-4 gap-y-1 sm:gap-y-0">
+                
+                {/* Icon: spans 2 rows below 'sm' (row-span-2), standard element from 'sm' upwards */}
+                <div className="row-span-2 self-center sm:self-auto w-8 h-8 xs:w-10 xs:h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-slate-400 shrink-0">
                   <Bell className="w-4 h-4 xs:w-5 xs:h-5 text-emerald-500" />
                 </div>
-                <div className="min-w-0 pr-2">
+
+                {/* Text content and controls block */}
+                <div className="min-w-0 pr-0 sm:pr-2 flex-1">
+                  {/* Row 1 (top on both mobile and desktop views) */}
                   <p className="text-sm font-medium text-slate-800">
                     E-mail értesítés sorsolásról
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Értesítést kapsz, amikor egy szobádban megtörténik a sorsolás.
-                  </p>
-                </div>
-              </div>
 
-              <button
-                type="button"
-                role="switch"
-                aria-checked={profile.email_notifications_enabled ?? true}
-                disabled={isUpdatingNotification}
-                onClick={handleToggleEmailNotification}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 ${
-                  (profile.email_notifications_enabled ?? true)
-                    ? "bg-emerald-500"
-                    : "bg-slate-300"
-                }`}
-                title={
-                  (profile.email_notifications_enabled ?? true)
-                    ? "Értesítések kikapcsolása"
-                    : "Értesítések bekapcsolása"
-                }
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    (profile.email_notifications_enabled ?? true)
-                      ? "translate-x-5"
-                      : "translate-x-0"
-                  }`}
-                />
-              </button>
+                  {/* Row 2 below 'sm': explanatory description and toggle switch side-by-side */}
+                  <div className="flex items-center justify-between gap-3 mt-1 sm:mt-0.5 sm:block">
+                    <p className="text-xs text-slate-500 leading-snug">
+                      Értesítést kapsz, amikor egy szobádban megtörténik a sorsolás.
+                    </p>
+
+                    {/* Toggle switch - rendered here beside description on screens below 'sm' */}
+                    <div className="sm:hidden shrink-0">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={profile.email_notifications_enabled ?? true}
+                        disabled={isUpdatingNotification}
+                        onClick={handleToggleEmailNotification}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 ${
+                          (profile.email_notifications_enabled ?? true)
+                            ? "bg-emerald-500"
+                            : "bg-slate-300"
+                        }`}
+                        title={
+                          (profile.email_notifications_enabled ?? true)
+                            ? "Értesítések kikapcsolása"
+                            : "Értesítések bekapcsolása"
+                        }
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            (profile.email_notifications_enabled ?? true)
+                              ? "translate-x-5"
+                              : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Toggle switch - rendered on right side of card on screens 'sm' and above */}
+                <div className="hidden sm:block shrink-0">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={profile.email_notifications_enabled ?? true}
+                    disabled={isUpdatingNotification}
+                    onClick={handleToggleEmailNotification}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 ${
+                      (profile.email_notifications_enabled ?? true)
+                        ? "bg-emerald-500"
+                        : "bg-slate-300"
+                    }`}
+                    title={
+                      (profile.email_notifications_enabled ?? true)
+                        ? "Értesítések kikapcsolása"
+                        : "Értesítések bekapcsolása"
+                    }
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        (profile.email_notifications_enabled ?? true)
+                          ? "translate-x-5"
+                          : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+              </div>
             </div>
           </div>
 
