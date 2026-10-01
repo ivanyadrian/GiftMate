@@ -139,7 +139,7 @@ export default function Navbar() {
         <img
           src="/navbar_logo.svg"
           alt="GiftMate Logo"
-          className="w-7 h-7 mr-1 object-contain transition-transform duration-400 group-hover:scale-110"
+          className="w-7 h-7 mr-1 object-contain transition-transform duration-300 group-hover:scale-110"
         />
         <span className="text-2xl font-bold text-slate-800 tracking-wide">
           GiftMate

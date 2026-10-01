@@ -228,6 +228,15 @@ export function useRoomDetails(id: string | undefined) {
           data: { user },
         } = await supabase.auth.getUser();
 
+        // If unauthenticated or token expired, redirect immediately to login with redirect back to this room
+        if (!user) {
+          if (!isMounted) return;
+          navigate(`/login?redirect=${encodeURIComponent(`/room/${id}`)}`, {
+            replace: true,
+          });
+          return;
+        }
+
         // 1. Fetch room details, members, and my_draw in ONE atomic network call via get_room_full_details RPC
         const { data: fullDetails, error: rpcError } = await supabase.rpc(
           "get_room_full_details",

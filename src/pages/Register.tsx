@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import ErrorToast from "../components/ui/ErrorToast";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
@@ -12,7 +12,7 @@ import ChristmasWindChimes from "../assets/animations/christmas_wind_chimes.lott
  *
  * Provides new user registration functionality using email/password and Google OAuth.
  * Automatically checks for an existing session on mount and redirects authenticated users
- * directly to the Dashboard. Includes responsive layout with animations and
+ * directly to their destination or Dashboard. Includes responsive layout with animations and
  * client-side form validation.
  */
 export default function Register() {
@@ -30,27 +30,31 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirectPath = searchParams.get("redirect") || "/dashboard";
 
   /**
    * Session Guard:
    * Checks if an authenticated session already exists on component mount or is established,
-   * redirecting the user to the Dashboard to prevent redundant registration.
+   * redirecting the user to destination or Dashboard.
    */
   useEffect(() => {
     // 1. Initial check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
+      if (session) navigate(redirectPath, { replace: true });
     });
 
     // 2. Real-time auth state listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) navigate("/dashboard");
+      if (session) navigate(redirectPath, { replace: true });
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, redirectPath]);
 
   /**
    * Handles email & password registration.
@@ -87,19 +91,19 @@ export default function Register() {
       }
       setLoading(false);
     } else {
-      navigate("/dashboard");
+      navigate(redirectPath, { replace: true });
     }
   };
 
   /**
    * Initiates Google OAuth authentication flow via Supabase.
-   * Redirects the user back to the application's dashboard upon successful authentication.
+   * Redirects the user back to their destination or dashboard upon successful authentication.
    */
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}${redirectPath}`,
         queryParams: {
           prompt: "select_account",
         },
@@ -270,7 +274,11 @@ export default function Register() {
           <p className="text-center text-xs text-slate-500 mt-6">
             Már van fiókod?{" "}
             <Link
-              to="/login"
+              to={
+                redirectPath !== "/dashboard"
+                  ? `/login?redirect=${encodeURIComponent(redirectPath)}`
+                  : "/login"
+              }
               className="font-semibold text-emerald-600 hover:underline"
             >
               Jelentkezz be itt

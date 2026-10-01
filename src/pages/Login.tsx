@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
@@ -14,7 +14,7 @@ import ChristmasWindChimes from "../assets/animations/christmas_wind_chimes.lott
  * Handles user authentication via standard email/password credentials or Google OAuth.
  * Key features:
  * - Automatically populates saved credentials if "Remember Me" was previously selected.
- * - Redirects authenticated users directly to the Dashboard.
+ * - Redirects authenticated users directly to their destination or Dashboard.
  * - Houses the modal trigger for forgotten password recovery (`ForgotPasswordModal`).
  * - Displays client-side error notifications using `ErrorToast`.
  */
@@ -35,11 +35,15 @@ export default function Login() {
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirectPath = searchParams.get("redirect") || "/dashboard";
 
   /**
    * Session Guard & Credential Restoration:
    * 1. Restores previously saved email from LocalStorage if "Remember Me" was checked.
-   * 2. Checks for an active authenticated session and redirects to Dashboard.
+   * 2. Checks for an active authenticated session and redirects to destination.
    * 3. Listens for auth state changes (e.g. following OAuth redirect).
    */
   useEffect(() => {
@@ -52,18 +56,18 @@ export default function Login() {
 
     // 2. Redirect if already authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
+      if (session) navigate(redirectPath, { replace: true });
     });
 
     // 3. Listen for auth state changes and redirect upon successful login
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) navigate("/dashboard");
+      if (session) navigate(redirectPath, { replace: true });
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, redirectPath]);
 
   /**
    * Handles standard email and password sign-in.
@@ -99,19 +103,19 @@ export default function Login() {
       }
       setLoading(false);
     } else {
-      navigate("/dashboard");
+      navigate(redirectPath, { replace: true });
     }
   };
 
   /**
    * Initiates Google OAuth authentication flow.
-   * Redirects to the application's dashboard upon successful authentication.
+   * Redirects to destination upon successful authentication.
    */
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}${redirectPath}`,
         queryParams: {
           prompt: "select_account",
         },
@@ -269,7 +273,11 @@ export default function Login() {
           <p className="text-center text-xs text-slate-500 mt-6">
             Nincs fiókod?{" "}
             <Link
-              to="/register"
+              to={
+                redirectPath !== "/dashboard"
+                  ? `/register?redirect=${encodeURIComponent(redirectPath)}`
+                  : "/register"
+              }
               className="font-semibold text-emerald-600 hover:underline"
             >
               Regisztrálj be itt
