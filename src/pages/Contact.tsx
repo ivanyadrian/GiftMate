@@ -62,6 +62,17 @@ export default function Contact() {
 
     const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 
+    // Verify presence of Web3Forms access key
+    if (!accessKey) {
+      console.error(
+        "Web3Forms error: VITE_WEB3FORMS_ACCESS_KEY is not defined in environment variables.",
+      );
+      setFormError(
+        "A kapcsolatfelvételi űrlap jelenleg nem elérhető. Kérlek, keress meg közvetlenül LinkedInen vagy GitHubon!",
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
