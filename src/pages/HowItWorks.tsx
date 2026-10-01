@@ -1,5 +1,10 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, WifiSync, CheckCircle2, ArrowRight } from "lucide-react";
+import { supabase } from "../supabaseClient";
+import type { User } from "@supabase/supabase-js";
+import ProfileSetupModal from "../components/ui/ProfileSetupModal";
+import { getGoogleAvatarUrl } from "../utils/avatar";
 
 /**
  * Interface representing an individual step in the workflow timeline.
@@ -32,12 +37,43 @@ interface PlatformHighlight {
  * 3. Draw Execution (manual trigger or scheduled countdown, self-draw prevention).
  * 4. Pair Reveal & Tracking (interactive reveal card, live participant status).
  *
- * Key Layout Characteristics:
- * - Dynamic vertical timeline connector rendered with progressive Tailwind gradients.
- * - Feature guarantee cards highlighting encryption, fairness, and live sync.
- * - Bottom CTA bar routing directly to room creation or user dashboard.
+ * Hosts the initial ProfileSetupModal on first login so users complete their profile
+ * directly with the friendly onboarding guide rendered in the background.
  */
 export default function HowItWorks() {
+  // --- First-time Profile Setup Modal States ---
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        if (data) {
+          setProfile(data);
+          if (!data.is_profile_complete) {
+            setShowAvatarModal(true);
+          }
+        }
+      }
+    };
+    checkProfile();
+  }, []);
+
+  const handleSetupComplete = () => {
+    setShowAvatarModal(false);
+    setProfile((prev: any) => (prev ? { ...prev, is_profile_complete: true } : prev));
+  };
+
   // --- Workflow Steps Configuration ---
   const steps: WorkflowStep[] = [
     {
@@ -103,6 +139,24 @@ export default function HowItWorks() {
 
   return (
     <div className="min-h-[calc(100vh-140px)] w-full py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex flex-col gap-14">
+      {/* Onboarding Profile Setup Modal for first-time visitors */}
+      {showAvatarModal && user && (
+        <ProfileSetupModal
+          userId={user.id}
+          initialAvatarUrl={
+            profile?.avatar_url || user.user_metadata?.avatar_url
+          }
+          initialDisplayName={
+            profile?.username ||
+            user.user_metadata?.display_name ||
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name
+          }
+          googleAvatarUrl={getGoogleAvatarUrl(user)}
+          onComplete={handleSetupComplete}
+        />
+      )}
+
       {/* Hero Header Section */}
       <div className="text-center flex flex-col items-center gap-4 max-w-3xl mx-auto">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">

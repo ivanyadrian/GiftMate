@@ -41,6 +41,28 @@ export default function Login() {
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
   /**
+   * Resolves target destination:
+   * 1. If explicit redirect specified (e.g. /room/:id from invitation), honor it.
+   * 2. If first-time user (profile incomplete), route to /how-it-works where setup modal is hosted.
+   * 3. Otherwise standard /dashboard.
+   */
+  const resolveDestination = async (userId: string, targetPath: string) => {
+    if (targetPath && targetPath !== "/dashboard") {
+      return targetPath;
+    }
+    const { data } = await supabase
+      .from("profiles")
+      .select("is_profile_complete")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (data && !data.is_profile_complete) {
+      return "/how-it-works";
+    }
+    return "/dashboard";
+  };
+
+  /**
    * Session Guard & Credential Restoration:
    * 1. Restores previously saved email from LocalStorage if "Remember Me" was checked.
    * 2. Checks for an active authenticated session and redirects to destination.
@@ -55,15 +77,21 @@ export default function Login() {
     }
 
     // 2. Redirect if already authenticated
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate(redirectPath, { replace: true });
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        const dest = await resolveDestination(session.user.id, redirectPath);
+        navigate(dest, { replace: true });
+      }
     });
 
     // 3. Listen for auth state changes and redirect upon successful login
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) navigate(redirectPath, { replace: true });
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        const dest = await resolveDestination(session.user.id, redirectPath);
+        navigate(dest, { replace: true });
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -86,7 +114,7 @@ export default function Login() {
     }
 
     // Authenticate with Supabase Auth
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -102,8 +130,9 @@ export default function Login() {
         setError(error.message);
       }
       setLoading(false);
-    } else {
-      navigate(redirectPath, { replace: true });
+    } else if (authData.user) {
+      const dest = await resolveDestination(authData.user.id, redirectPath);
+      navigate(dest, { replace: true });
     }
   };
 

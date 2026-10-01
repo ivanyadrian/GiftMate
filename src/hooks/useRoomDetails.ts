@@ -221,21 +221,25 @@ export function useRoomDetails(id: string | undefined) {
   useEffect(() => {
     let isMounted = true;
     let channel: any = null;
+    let isRedirecting = false;
 
     const fetchRoomAndMembers = async () => {
       try {
         const {
-          data: { user },
-        } = await supabase.auth.getUser();
+          data: { session },
+        } = await supabase.auth.getSession();
 
         // If unauthenticated or token expired, redirect immediately to login with redirect back to this room
-        if (!user) {
+        if (!session?.user) {
+          isRedirecting = true;
           if (!isMounted) return;
           navigate(`/login?redirect=${encodeURIComponent(`/room/${id}`)}`, {
             replace: true,
           });
           return;
         }
+
+        const user = session.user;
 
         // 1. Fetch room details, members, and my_draw in ONE atomic network call via get_room_full_details RPC
         const { data: fullDetails, error: rpcError } = await supabase.rpc(
@@ -370,7 +374,7 @@ export function useRoomDetails(id: string | undefined) {
       } catch (error) {
         console.error("Error initializing room:", error);
       } finally {
-        if (isMounted) {
+        if (isMounted && !isRedirecting) {
           setLoading(false);
         }
       }

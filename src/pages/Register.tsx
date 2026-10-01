@@ -36,21 +36,49 @@ export default function Register() {
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
   /**
+   * Resolves target destination:
+   * 1. If explicit redirect specified (e.g. /room/:id from invitation), honor it.
+   * 2. If first-time user (profile incomplete), route to /how-it-works where setup modal is hosted.
+   * 3. Otherwise standard /dashboard.
+   */
+  const resolveDestination = async (userId: string, targetPath: string) => {
+    if (targetPath && targetPath !== "/dashboard") {
+      return targetPath;
+    }
+    const { data } = await supabase
+      .from("profiles")
+      .select("is_profile_complete")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (data && !data.is_profile_complete) {
+      return "/how-it-works";
+    }
+    return "/dashboard";
+  };
+
+  /**
    * Session Guard:
    * Checks if an authenticated session already exists on component mount or is established,
    * redirecting the user to destination or Dashboard.
    */
   useEffect(() => {
     // 1. Initial check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate(redirectPath, { replace: true });
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        const dest = await resolveDestination(session.user.id, redirectPath);
+        navigate(dest, { replace: true });
+      }
     });
 
     // 2. Real-time auth state listener
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) navigate(redirectPath, { replace: true });
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        const dest = await resolveDestination(session.user.id, redirectPath);
+        navigate(dest, { replace: true });
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -74,7 +102,7 @@ export default function Register() {
     }
 
     // Register user via Supabase Auth
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -90,8 +118,14 @@ export default function Register() {
         setError(error.message);
       }
       setLoading(false);
+    } else if (authData.user) {
+      const dest = await resolveDestination(authData.user.id, redirectPath);
+      navigate(dest, { replace: true });
     } else {
-      navigate(redirectPath, { replace: true });
+      navigate(
+        redirectPath !== "/dashboard" ? redirectPath : "/how-it-works",
+        { replace: true },
+      );
     }
   };
 

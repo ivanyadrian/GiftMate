@@ -2,8 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import type { User } from "@supabase/supabase-js";
-import ProfileSetupModal from "../components/ui/ProfileSetupModal";
-import { getGoogleAvatarUrl } from "../utils/avatar";
 import LottieLoader from "../components/LottieLoader";
 import ErrorToast from "../components/ui/ErrorToast";
 import {
@@ -29,7 +27,7 @@ import { useClipboard } from "../hooks/useClipboard";
  * - Features an OTP-style 6-character room joining input with auto-advance, backspace handling,
  *   arrow-key navigation, and paste support via `join_room_by_code` RPC.
  * - Directs users to the room creation wizard (`/create-room`).
- * - Displays the `ProfileSetupModal` automatically if the user has not completed their initial profile setup.
+ * - Forwards incomplete profiles directly to `/how-it-works` onboarding.
  * - Subscribes to Supabase Realtime changes on `rooms`, `room_members`, and `draws` tables to keep lists synchronized.
  */
 interface MyRoom {
@@ -53,13 +51,9 @@ interface MyRoom {
 }
 
 export default function Dashboard() {
-  // --- User & Profile States ---
+  // --- User & Loading States ---
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
-  // --- Profile Setup Modal Toggle ---
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   // --- Room Joining States ---
   const [roomCode, setRoomCode] = useState("");
@@ -277,43 +271,23 @@ export default function Dashboard() {
   };
 
   /**
-   * Fetches user profile record from `profiles` table.
-   * Prompts avatar/name setup modal if profile is incomplete.
+   * Validates user profile record from `profiles` table.
+   * If profile setup is incomplete, forwards user immediately to `/how-it-works`.
    */
-  const fetchProfile = async (userId: string) => {
+  const validateProfile = async (userId: string) => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("is_profile_complete")
       .eq("id", userId)
       .limit(1);
     if (!error && data && data.length > 0) {
-      setProfile(data[0]);
-      setShowAvatarModal(!data[0].is_profile_complete);
+      if (!data[0].is_profile_complete) {
+        navigate("/how-it-works", { replace: true });
+        return false;
+      }
+      return true;
     }
-  };
-
-  /**
-   * Refreshes user auth and profile data following modal updates.
-   * Dispatches `profileUpdated` event across the window for cross-component sync.
-   */
-  const refreshUser = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    setUser(user);
-    if (user) {
-      await fetchProfile(user.id);
-    }
-    window.dispatchEvent(new CustomEvent("profileUpdated"));
-  };
-
-  /**
-   * Handles completion of mandatory initial profile setup (avatar & display name).
-   * Refreshes user auth/profile data and redirects first-time users to the "Hogyan működik?" onboarding guide.
-   */
-  const handleInitialSetupComplete = async () => {
-    await refreshUser();
-    navigate("/how-it-works");
+    return false;
   };
 
   /**
@@ -327,10 +301,15 @@ export default function Dashboard() {
       } = await supabase.auth.getSession();
       if (session) {
         setUser(session.user);
-        await fetchProfile(session.user.id);
+        const isComplete = await validateProfile(session.user.id);
+        if (!isComplete) {
+          // Navigating to /how-it-works, keep loading true so dashboard never renders
+          return;
+        }
         await fetchMyRooms(session.user.id);
       } else {
         navigate("/login");
+        return;
       }
       setLoading(false);
     };
@@ -342,11 +321,12 @@ export default function Dashboard() {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
         setUser(session.user);
-        await fetchProfile(session.user.id);
-        fetchMyRooms(session.user.id);
+        const isComplete = await validateProfile(session.user.id);
+        if (isComplete) {
+          fetchMyRooms(session.user.id);
+        }
       } else {
         setUser(null);
-        setProfile(null);
         setMyRooms([]);
         navigate("/login");
       }
@@ -414,24 +394,6 @@ export default function Dashboard() {
       {/* Floating Error Notification */}
       {errorMsg && (
         <ErrorToast message={errorMsg} onClose={() => setErrorMsg(null)} />
-      )}
-
-      {/* Mandatory Initial Profile Setup Modal */}
-      {showAvatarModal && user && (
-        <ProfileSetupModal
-          userId={user.id}
-          initialAvatarUrl={
-            profile?.avatar_url || user.user_metadata?.avatar_url
-          }
-          initialDisplayName={
-            profile?.username ||
-            user.user_metadata?.display_name ||
-            user.user_metadata?.full_name ||
-            user.user_metadata?.name
-          }
-          googleAvatarUrl={getGoogleAvatarUrl(user)}
-          onComplete={handleInitialSetupComplete}
-        />
       )}
 
       <div className="w-full max-w-5xl flex flex-col gap-6 animate-in fade-in zoom-in-95 duration-300">
