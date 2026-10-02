@@ -29,6 +29,18 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Only mount resource-heavy Lottie animation on desktop to prevent mobile overhead
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)").matches : false
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -153,16 +165,18 @@ export default function Register() {
       <div className="bg-white rounded-3xl shadow-lg flex flex-col md:flex-row overflow-hidden max-w-4xl w-full border border-slate-100">
         {/* Left Column (Desktop only): Lottie wind chimes animation */}
         <div className="hidden md:flex flex-1 bg-emerald-50/60 pl-2 relative overflow-hidden">
-          <DotLottieReact
-            src={ChristmasWindChimes}
-            loop
-            autoplay
-            className="absolute right-0 top-0 w-112.5 h-112.5 max-w-none pointer-events-none scale-120 origin-top-right"
-            layout={{
-              fit: "contain",
-              align: [1, 0],
-            }}
-          />
+          {isDesktop && (
+            <DotLottieReact
+              src={ChristmasWindChimes}
+              loop
+              autoplay
+              className="absolute right-0 top-0 w-112.5 h-112.5 max-w-none pointer-events-none scale-120 origin-top-right"
+              layout={{
+                fit: "contain",
+                align: [1, 0],
+              }}
+            />
+          )}
         </div>
 
         {/* Right Column: Registration Form & Social Login */}

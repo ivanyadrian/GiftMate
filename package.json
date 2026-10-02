@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
     "@lottiefiles/dotlottie-react": "^0.19.14",
     "@supabase/supabase-js": "^2.112.3",
     "@vercel/analytics": "^2.0.1",
